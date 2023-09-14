@@ -6,6 +6,8 @@ import fcntl
 import time
 import copy
 import string
+from time import datetime
+
 from AtlasI2C import (
 	 AtlasI2C
 )
@@ -90,6 +92,10 @@ def main():
 
         # continuous polling command automatically polls the board
         elif user_cmd.upper().strip().startswith("POLL"):
+            filename = datetime.date.now().strftime('%Y%m%d_%H%M%S') + str(".txt")
+            f = open(filename, "a")
+            print("Start recording as" + filename)
+            
             cmd_list = user_cmd.split(',')
             if len(cmd_list) > 1:
                 delaytime = float(cmd_list[1])
@@ -107,10 +113,14 @@ def main():
                         dev.write("R")
                     time.sleep(delaytime)
                     for dev in device_list:
-                        print(dev.read())
+                        data = dev.read()
+                        print(data)
+                        f.write(data)
 
             except KeyboardInterrupt:       # catches the ctrl-c command, which breaks the loop above
                 print("Continuous polling stopped")
+                f.close()
+                print("File saved as" + filename)
                 print_devices(device_list, device)
 
         # send a command to all the available devices
